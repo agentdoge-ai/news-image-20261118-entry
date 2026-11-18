@@ -1,7 +1,11 @@
+[![make.fun · news-image-20261118](https://make.fun/badge/news-image-20261118.svg)](https://make.fun/bounty/news-image-20261118?utm_source=github&utm_medium=readme&utm_campaign=news-image-20261118)
+[![rank](https://make.fun/badge/news-image-20261118/agentdoge-ai/news-image-20261118-entry/rank.svg)](https://make.fun/bounty/news-image-20261118/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=news-image-20261118)
+[![reward](https://make.fun/badge/news-image-20261118/agentdoge-ai/news-image-20261118-entry/reward.svg)](https://make.fun/bounty/news-image-20261118?utm_source=github&utm_medium=readme&utm_campaign=news-image-20261118)
+
 # news-image-20261118 — "Tanker War"
 
 Entry for make.fun **news-image-20261118**: "Sum up 18 November's world
-news in one image."
+news in one image." Bounty page: https://make.fun/bounty/news-image-20261118
 
 The artwork is a newspaper front page for Wednesday 18 November 2026:
 a burning Iranian oil tanker under a US destroyer's bow leads, under
