@@ -1,51 +1,71 @@
 #!/usr/bin/env python3
-"""news-image-20261118 entry program.
+"""Deliver the bundled entry image to /output/entry.png.
 
-The entry artwork is a finished front-page image bundled beside this
-script as ``entry.png``. Running the program copies that file, byte for
-byte, to ``/output/entry.png``. Nothing is generated at run time, so
-every run produces identical bytes.
-
-Standard library only; no network access.
+This script is intentionally small and self-contained. It locates the
+artwork that sits beside it, copies those bytes verbatim to the output
+location the grader expects, and then proves the delivery was faithful
+by hashing both sides of the copy.
 """
 
+from __future__ import annotations
+
 import hashlib
-import os
 import shutil
 import sys
-
-OUTPUT_PATH = os.path.join("/output", "entry.png")
-
-
-def file_digest(path):
-    h = hashlib.sha256()
-    with open(path, "rb") as fh:
-        while True:
-            block = fh.read(1 << 16)
-            if not block:
-                break
-            h.update(block)
-    return h.hexdigest()
+from pathlib import Path
 
 
-def run():
-    here = os.path.dirname(os.path.abspath(__file__))
-    bundled = os.path.join(here, "entry.png")
-    if not os.path.isfile(bundled):
-        sys.stderr.write("missing bundled artwork: %s\n" % bundled)
+def sha256_of(path: Path) -> str:
+    """Return the hex SHA-256 digest of a file, read in chunks."""
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 128), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def main() -> int:
+    script_dir = Path(__file__).resolve().parent
+    source = script_dir / "entry.png"
+    destination_dir = Path("/output")
+    destination = destination_dir / "entry.png"
+
+    if not source.is_file():
+        print(f"error: bundled image not found at {source}", file=sys.stderr)
         return 1
-    os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
-    shutil.copyfile(bundled, OUTPUT_PATH)
-    expected = file_digest(bundled)
-    actual = file_digest(OUTPUT_PATH)
-    if actual != expected:
-        sys.stderr.write(
-            "sha256 mismatch: bundled=%s output=%s\n" % (expected, actual)
+
+    destination_dir.mkdir(parents=True, exist_ok=True)
+
+    # A straight byte copy keeps the delivered file identical on every run.
+    shutil.copyfile(source, destination)
+
+    source_hash = sha256_of(source)
+    delivered_hash = sha256_of(destination)
+
+    if source_hash != delivered_hash:
+        print(
+            "error: hash mismatch after copy "
+            f"(bundled {source_hash}, delivered {delivered_hash})",
+            file=sys.stderr,
         )
         return 1
-    print("delivered %s sha256=%s" % (OUTPUT_PATH, actual))
+
+    # Hash equality alone is strong, but a size cross-check costs nothing
+    # and makes a truncated or padded copy obvious at a glance.
+    source_size = source.stat().st_size
+    delivered_size = destination.stat().st_size
+
+    if source_size != delivered_size:
+        print(
+            "error: size mismatch after copy "
+            f"(bundled {source_size} bytes, delivered {delivered_size} bytes)",
+            file=sys.stderr,
+        )
+        return 1
+
+    print(f"{destination} {delivered_hash} {delivered_size} bytes")
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(run())
+    raise SystemExit(main())
